@@ -6,23 +6,6 @@ import java.awt.event.ActionListener;
 public class calculadoraTop {
     private JPanel tela;
     private JTextField visor;
-    private JButton botao9;
-    private JButton botao6;
-    private JButton botao3;
-    private JButton botao2;
-    private JButton botao8;
-    private JButton botao5;
-    private JButton botao7;
-    private JButton botao4;
-    private JButton botao1;
-    private JButton botao0;
-    private JButton botaoAdicao;
-    private JButton botaoSubtr;
-    private JButton botaoMultiplica;
-    private JButton botaoDividir;
-    private JButton clean;
-    private JButton botaoIgual;
-
     private String operador;
     private double num1, num2, resultado;
 
@@ -30,12 +13,14 @@ public class calculadoraTop {
         tela = new JPanel();
         visor = new JTextField(10);
         visor.setEditable(false);
+        visor.setFont(new Font("Arial", Font.BOLD, 24)); // Estilo do visor
         tela.setLayout(new BorderLayout());
         tela.add(visor, BorderLayout.NORTH);
 
         JPanel botoes = new JPanel();
-        botoes.setLayout(new GridLayout(4, 4));
+        botoes.setLayout(new GridLayout(5, 4)); // Adicionei uma linha extra para novos botões
 
+        // Adicionando botões numéricos e operacionais
         adicionarBotao(botoes, "7");
         adicionarBotao(botoes, "8");
         adicionarBotao(botoes, "9");
@@ -56,46 +41,53 @@ public class calculadoraTop {
         adicionarBotao(botoes, "=");
         adicionarBotao(botoes, "+");
 
+        adicionarBotao(botoes, "←"); // Botão de backspace
+
         tela.add(botoes, BorderLayout.CENTER);
     }
 
     private void adicionarBotao(JPanel painel, String texto) {
         JButton botao = new JButton(texto);
+        botao.setFont(new Font("Arial", Font.BOLD, 20)); // Estilo dos botões
+        botao.setPreferredSize(new Dimension(60, 60)); // Tamanho dos botões
+
         botao.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String comando = e.getActionCommand();
 
-                if (comando.chars().allMatch(Character::isDigit)) {
+                if (comando.chars().allMatch(Character::isDigit)) { // Entrada de números
                     visor.setText(visor.getText() + comando);
-                } else if (comando.equals("C")) {
+                } else if (comando.equals("C")) { // Limpa o visor
                     visor.setText("");
-                } else if (comando.equals("=")) {
-                    num2 = Double.parseDouble(visor.getText());
-                    switch (operador) {
-                        case "+":
-                            resultado = num1 + num2;
-                            break;
-                        case "-":
-                            resultado = num1 - num2;
-                            break;
-                        case "*":
-                            resultado = num1 * num2;
-                            break;
-                        case "/":
-                            if (num2 != 0) {
-                                resultado = num1 / num2;
-                            } else {
-                                visor.setText("Erro");
-                                return;
-                            }
-                            break;
+                } else if (comando.equals("←")) { // Apaga o último caractere
+                    String textoAtual = visor.getText();
+                    if (!textoAtual.isEmpty()) {
+                        visor.setText(textoAtual.substring(0, textoAtual.length() - 1));
                     }
-                    visor.setText(String.valueOf(resultado));
-                } else {
-                    operador = comando;
-                    num1 = Double.parseDouble(visor.getText());
-                    visor.setText("");
+                } else if (comando.equals("=")) { // Calcula o resultado
+                    if (visor.getText().isEmpty()) {
+                        visor.setText("0");
+                        return;
+                    }
+                    num2 = Double.parseDouble(visor.getText());
+                    switch (operador) { // Operações matemáticas
+                        case "+" -> resultado = num1 + num2;
+                        case "-" -> resultado = num1 - num2;
+                        case "*" -> resultado = num1 * num2;
+                        case "/" -> resultado = (num2 != 0) ? num1 / num2 : Double.NaN;
+                    }
+                    if (Double.isNaN(resultado)) {
+                        visor.setText("Erro");
+                    } else {
+                        visor.setText(String.valueOf(resultado));
+                    }
+                } else { // Define o operador e guarda o primeiro número
+                    if (!visor.getText().isEmpty()) {
+                        operador = comando;
+                        num1 = Double.parseDouble(visor.getText());
+                        visor.setText("");
+                    }
                 }
             }
         });
@@ -106,7 +98,8 @@ public class calculadoraTop {
         JFrame frame = new JFrame("Calculadora");
         frame.setContentPane(new calculadoraTop().tela);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(400, 400);
+        frame.pack(); // Ajusta o tamanho da janela automaticamente
+        frame.setResizable(false); // Impede redimensionamento
         frame.setVisible(true);
     }
 }
